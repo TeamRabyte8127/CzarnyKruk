@@ -6,6 +6,11 @@
 #include <wiringSerial.h>
 #include <stdlib.h>
 
+struct message{
+    uint8_t first_packet;
+    uint8_t second_packet;
+};
+
 class Communication{
 	 
 	public:
@@ -30,16 +35,30 @@ class Communication{
 		}
 		return 0;
 	}
-	void sendData(char n)
+
+	message transform_data(uint16_t data, bool sign)
 	{
-		serialPutchar(serial_port, n);
+    	message output;
+    
+    	output.first_packet = (uint8_t)((data & 0xFF00) >> 8);
+    	output.second_packet = (uint8_t)((data & 0xFF));
+    
+    	output.first_packet = output.first_packet|(sign<<7);
+    
+    	return output;
+	}
+
+	void sendData(message data)
+	{
+		serialPutchar(serial_port, data.first_packet)
+		serialPutchar(serial_port, data.second_packet);
 	}
 	bool dataAvailable()
 	{
 		return dataAvailable(serial_port);
-	int getData()
+	uint8_t getData()
 	{
-		int value;
+		uint8_t value;
 		while(!serialDataAvail (serial_port) );
 		if(serialDataAvail (serial_port))
 			{ 
