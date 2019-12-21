@@ -1,3 +1,16 @@
+/*
+  Team RaByte #8127
+  Project: CzarnyKruk
+  Arduino code
+  Motors, distancemeter and Raspberry Pi
+  communication.
+  
+  12-2019
+*/
+
+// MALISZ POPRAW 'motor_speed', BO NIE JEST ZADEKLAROWANE !!!
+
+
 // defining the RX abd TX port on Arduino Uno board
 #define rx 7
 #define tx 8
@@ -67,17 +80,17 @@ void loop() {
   uint8_t controlByte1, controlByte2, controlByte3, controlByte4;
   
   //to don't couse lag, we clear the buffer when there are more than 6 bytes (2 data packs) available
-  if(myserial.available()>6){
-    while(myserial.available()){
-      myserial.read();
+  if(mySerial.available()>6){
+    while(mySerial.available()){
+      mySerial.read();
     }
   }
   
   //if we have more than 3 bytes in serial port read buffer, we start to read control bytes and we can receive message for one motor
-  else if(myserial.available()>=3){
-    uint8_t dataPck1 = myserial.read();
-    uint8_t dataPck2 = myserial.read();
-    uint8_t dataPck3 = myserial.read();
+  else if(mySerial.available()>=3){
+    uint8_t dataPck1 = mySerial.read();
+    uint8_t dataPck2 = mySerial.read();
+    uint8_t dataPck3 = mySerial.read();
     controlByte1 = (0b11100000 & dataPck1)>>5;
     controlByte2 = (0b11100000 & dataPck2)>>5;
     controlByte3 = (0b11100000 & dataPck3)>>5;
@@ -133,6 +146,6 @@ void loop() {
   
   }
   
-  while(micros() - loop_timer < 1000)
+  while(micros() - loop_timer < 1000);
   
 }
