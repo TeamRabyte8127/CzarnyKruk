@@ -7,8 +7,14 @@
 #include <stdlib.h>
 
 struct message{
-    uint8_t first_packet;
-    uint8_t second_packet;
+    vector<uint8_t> packets;
+    int numberOfPackets;
+    void setPackets(){
+        packets.resize(numberOfPackets);
+        for(int i = 0; i<numberOfPackets; i++){
+            packets[i]=0x0000;
+        }
+    }
 };
 
 class Communication{
@@ -17,6 +23,36 @@ class Communication{
 	int serial_port;
 	int readPin;
 	int recieve;
+
+	uint8_t setBits(uint8_t var, uint8_t value, int second)
+	{
+    	var = var|(value<<(8-second));
+    	return var;
+	}
+
+	message setData(uint8_t value, uint8_t motor)
+	{
+	    message output;
+	    output.numberOfPackets=3;
+	    output.setPackets();
+	    
+	    uint8_t transformedValue[2];
+	    
+	    transformedValue[1]=(uint8_t)(0x0F & value);
+	    transformedValue[0]=value>>4;
+	    
+	    output.packets[0]=setBits(output.packets[0], 7, 3);
+	    output.packets[0]=setBits(output.packets[0], motor, 8);
+	    
+	    output.packets[1]=setBits(output.packets[1], 5, 3);
+	    output.packets[1]=setBits(output.packets[1], transformedValue[0], 8);
+	    
+	    output.packets[2]=setBits(output.packets[2], 3, 3);
+	    output.packets[2]=setBits(output.packets[2], transformedValue[1], 8);
+    
+    	return output;
+    }	
+
 	Communication(int s= serialOpen ("/dev/ttyS0", 9600),int n=16)
 	{
 		serial_port=s;
@@ -36,26 +72,18 @@ class Communication{
 		return 0;
 	}
 
-	message transform_data(uint16_t data, bool sign)
-	{
-    	message output;
-    
-    	output.first_packet = (uint8_t)((data & 0xFF00) >> 8);
-    	output.second_packet = (uint8_t)((data & 0xFF));
-    
-    	output.first_packet = output.first_packet|(sign<<7);
-    
-    	return output;
-	}
-
 	void sendData(message data)
 	{
-		serialPutchar(serial_port, data.first_packet)
-		serialPutchar(serial_port, data.second_packet);
+		for(int i = 0; i<3; i++){
+			serialPutchar(serial_port, data.packets[i]);
+		}
 	}
+
 	bool dataAvailable()
 	{
 		return dataAvailable(serial_port);
+	}
+
 	uint8_t getData()
 	{
 		uint8_t value;
