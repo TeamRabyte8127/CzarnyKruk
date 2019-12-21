@@ -15,10 +15,6 @@
 #define rx 7
 #define tx 8
 
-// defininig Trig and Echo pins for measuring distance device
-#define trigPin  10
-#define echoPin  9
-
 // defining motors and motors direction pins
 #define motor1 3
 #define motor1dir 4
@@ -42,8 +38,6 @@ long loop_timer = 0;
 // seting variables for distancemeter and and motors
 long readData;
 int motor;
-long duration;
-int distance;
 
 void setup() {
 // Setting motors pins I/O (registers)
@@ -60,11 +54,6 @@ void setup() {
   analogWrite(motor2, 0);
   analogWrite(motor3, 0);
   analogWrite(motor4, 0);
-
-  
-// Setting distancemotor pins I/O
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
   
   // Starting port monitor
   Serial.begin(9600);
