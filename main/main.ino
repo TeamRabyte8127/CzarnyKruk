@@ -1,9 +1,12 @@
+// defining the RX abd TX port on Arduino Uno board
 #define rx 7
 #define tx 8
 
+// defininig Trig and Echo pins for measuring distance device
 #define trigPin  10
 #define echoPin  9
 
+// defining motors and motors direction pins
 #define motor1 3
 #define motor1dir 4
 #define motor2 5
@@ -13,16 +16,24 @@
 #define motor4 11
 #define motor4dir 12
 
+// including necesery libraries
 #include <SoftwareSerial.h>
 
 SoftwareSerial mySerial(rx, tx);
 
-int readData;
+// variables containing motor's speed and direction
+uint8_t motor1_speed, motor2_speed, motor3_speed, motor4_speed;
+uint8_t motor1_dir, motor2_dir, motor3_dir, motor4_dir;
+long loop_timer = 0;
+
+// seting variables for distancemeter and and motors
+long readData;
 int motor;
 long duration;
 int distance;
+
 void setup() {
-// silniki
+// Setting motors pins I/O (registers)
   PORTD = B00001000;
   PORTD = B00010000;
   PORTD = B00100000;
@@ -31,117 +42,97 @@ void setup() {
   PORTD = B00000100;
   PORTB = B00001000;
   PORTB = B00010000;
-// Dalmierz
+  
+  analogWrite(motor1, 0);
+  analogWrite(motor2, 0);
+  analogWrite(motor3, 0);
+  analogWrite(motor4, 0);
+
+  
+// Setting distancemotor pins I/O
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
-  //DDRB = B00000010;
-  //PORTB = B00000100;
   
+  // Starting port monitor
   Serial.begin(9600);
-
   mySerial.begin(9600);
 }
+
 void loop() {
-
-  while (mySerial.available())
-  {
-    readData = mySerial.read();
-    Serial.println(readData);
-    
-    if(readData==-1)break;
-    
-    else if (readData < 10)
-    {
-      switch (readData) {
-        case 1:
-          motor = 1;
-          break;
-    
-        case 2:
-          motor = 2;
-          break;
   
-        case 3:
-          motor = 3;
-          break;
+  loop_timer = micros();
   
-        case 4:
-          motor = 4;
-          break;
-      }
-    }
-    else {
-      if ((readData < 110) && (readData > 10))
-   
-      {
-        switch(motor)
-        {
-          case 1:
-          //digitalWrite(motor1dir,LOW);
-          PORTD = B00000000;
-          break;
-          
-          case 2:
-          //digitalWrite(motor2dir,LOW);
-          PORTB = B00000000;
-          break;
-          
-          case 3:
-          //digitalWrite(motor3dir,LOW);
-          PORTD = B00000000;
-          break;
-          
-          case 
-          //digitalWrite(motor4dir,LOW);
-          PORTB = 00000000;
-          break;
-        }
-     int value=map(readData,10,110,0,255);
-       analogWrite(motor, value);
-    }
-    else if(readData>110&&readData<210)
-    {
-      switch(motor)
-      {
-        case 1:
-        //digitalWrite(motor1dir, HIGH);
-        PORTD = B00010000;
-        break;
-        
-        case 2:
-        //digitalWrite(motor2dir, HIGH);
-        PORTB = B00100000;
-        break;
-        
-        case 3:
-        //digitalWrite(motor3dir, HIGH);
-        PORTD = B00000100;
-        break;
-        
-        case 4:
-        //digitalWrite(motor4dir, HIGH);
-        PORTB = B00010000;
-        break;
-      }
-       int value=map(readData,10,110,0,255);
-       analogWrite(motor, value);
+  
+  // defining control bytes
+  uint8_t controlByte1, controlByte2, controlByte3, controlByte4;
+  
+  //to don't couse lag, we clear the buffer when there are more than 6 bytes (2 data packs) available
+  if(myserial.available()>6){
+    while(myserial.available()){
+      myserial.read();
     }
   }
-
-  } 
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  duration = pulseIn(echoPin, HIGH);
-  distance = duration*0.034/2;
-  if (distance > 200) {
-    distance = 200;
+  
+  //if we have more than 3 bytes in serial port read buffer, we start to read control bytes and we can receive message for one motor
+  else if(myserial.available()>=3){
+    uint8_t dataPck1 = myserial.read();
+    uint8_t dataPck2 = myserial.read();
+    uint8_t dataPck3 = myserial.read();
+    controlByte1 = (0b11100000 & dataPck1)>>5;
+    controlByte2 = (0b11100000 & dataPck2)>>5;
+    controlByte3 = (0b11100000 & dataPck3)>>5;
+    motor_id = (0b00001111 & dataPck1)
+  
   }
-  Serial.println(distance);
-  mySerial.write(distance);
-
- 
+  
+  
+  
+  //if all data packs are correct we can write new values to the motor
+  if(controlByte1 == 1 && controlByte2 == 2 && controlByte3 == 3){
+    
+    switch(motor_id){
+      case 1: 
+          motor1_speed = (0b00001111 & dataPck2) | (0b00001111 & dataPck3) << 4;
+          if(motor1_speed<110)motor1_dir = 1;
+          else if(motor_speed>110){
+            motor1_dir = 0;
+            motor1_speed -= 110;
+          }
+          else if(motor1_speed == 110) motor1_speed = 0;
+          break;
+      case 2:
+          motor2_speed = (0b00001111 & dataPck2) | (0b00001111 & dataPck3) << 4;
+          if(motor2_speed<110)motor2_dir = 1;
+          else if(motor_speed>110){
+            motor2_dir = 0;
+            motor2_speed -= 110;
+          }
+          else if(motor2_speed == 110) motor2_speed = 0;
+          break;
+       case 3:
+          motor3_speed = (0b00001111 & dataPck2) | (0b00001111 & dataPck3) << 4;
+          if(motor3_speed<110)motor3_dir = 1;
+          else if(motor_speed>110){
+            motor3_dir = 0;
+            motor3_speed -= 110;
+          }
+          else if(motor3_speed == 110) motor3_speed = 0;
+          break;
+       case 4:
+          motor4_speed = (0b00001111 & dataPck2) | (0b00001111 & dataPck3) << 4;
+          if(motor4_speed<110)motor1_dir = 1;
+          else if(motor_speed>110){
+            motor4_dir = 0;
+            motor4_speed -= 110;
+          }
+          else if(motor4_speed == 110) motor4_speed = 0;
+          break;
+          
+      }
+  
+  
+  }
+  
+  while(micros() - loop_timer < 1000)
+  
 }
