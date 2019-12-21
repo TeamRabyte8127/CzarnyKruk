@@ -34,7 +34,9 @@ class Communication{
 	{
 		serialPutchar(serial_port, n);
 	}
-	
+	bool dataAvailable()
+	{
+		return dataAvailable(serial_port);
 	int getData()
 	{
 		int value;
