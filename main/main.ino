@@ -9,19 +9,27 @@
 */
 
 
-// defining the RX abd TX port on Arduino Uno board
-#define rx 7
-#define tx 8
-
 // defining motors and motors direction pins
 #define motor1 3
 #define motor1dir 4
+#define motor1_enca PINB7
+#define motor1_encb PINB8
+
+
 #define motor2 5
 #define motor2dir 13
+#define motor2_enca PINB10
+#define motor2_encb PINB11
+
 #define motor3 6
 #define motor3dir 2
+#define motor3_enca 
+#define motor3_encb
+
 #define motor4 11
 #define motor4dir 12
+#define motor4_enca 
+#define motor4_encb
 
 
 // variables containing motor's speed and direction
@@ -38,6 +46,15 @@ long readData;
 int motor;
 
 void setup() {
+//setup external interrupts to read motors speed and direction
+SREG |= 0b1 << 7;
+PCICR |= 0b111;
+PCMSK2 |= 0b00000000;
+PCMSK1 |= 0b00000000;
+PCMSK0 |= 0b00000000;
+
+
+
 // Setting motors pins I/O (registers)
   PORTD = B00001000;
   PORTD = B00010000;
@@ -136,5 +153,31 @@ void serialEvent(){                                                             
 }
 
 void setMotorSpeed(uint8_t motorID, uint8_t motorSpeed){
+
+  //we can come up with something more brilliant
   analogWrite(motorID, map(motorSpeed, 0, 110, 0, 255));
+
+}
+
+//do stuff on interrupt on PCINT0...7
+ISR(PCINT0_vect){
+
+  if(PINB & (0b1 << motor1_enca)){
+    
+  }
+
+}
+
+//do stuff on interrupt on PCINT8...15
+ISR(PCINT1_vect){
+
+
+
+}
+
+//do stuff on interrupt on PCINT16...23
+ISR(PCINT0_vect){
+
+
+
 }
