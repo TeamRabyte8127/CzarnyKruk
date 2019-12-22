@@ -7,17 +7,16 @@ class DriveTrain  {
 
     private:
         uint8_t motor1, motor2, motor3, motor4;
+        Communication com;
         const int inputCorretion = 110;
     
     public:
         void set_motors(int16_t motor1_value, int16_t motor2_value, int16_t motor3_value, int16_t motor4_value)  {
-            Communication com;
-            if(!com.setup(com.serial_port))
-            {
-                com.sendData(motor1); com.sendData( motor1_value+inputCorretion);
-                com.sendData(motor2) ; com.sendData( motor2_value+inputCorretion);
-                com.sendData(motor3); com.sendData( motor3_value+inputCorretion);
-                com.sendData(motor4); com.sendData( motor4_value+inputCorretion);
+            if(!com.setup(com.serial_port))  {
+                com.sendData(motor1); com.sendData(motor1_value + inputCorretion);
+                com.sendData(motor2); com.sendData(motor2_value + inputCorretion);
+                com.sendData(motor3); com.sendData(motor3_value + inputCorretion);
+                com.sendData(motor4); com.sendData(motor4_value + inputCorretion);
             }
         }
 
@@ -47,10 +46,11 @@ class DriveTrain  {
 
         }
 
-    DriveTrain(uint8_t mot1, uint8_t mot2, uint8_t mot3, uint8_t mot4)  {
+    DriveTrain(uint8_t mot1, uint8_t mot2, uint8_t mot3, uint8_t mot4, Communication comunication;)  {
         motor1 = mot1;
         motor2 = mot2;
         motor3 = mot3;
         motor4 = mot4;
+        com = communication;
     }
 };
