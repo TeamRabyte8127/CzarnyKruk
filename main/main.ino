@@ -25,14 +25,14 @@
 #define motor4 11
 #define motor4dir 12
 
-// including necesery libraries
-#include <SoftwareSerial.h>
-
-SoftwareSerial mySerial(rx, tx);
 
 // variables containing motor's speed and direction
+uint8_t motor1_speed_raw, motor2_speed_raw, motor3_speed_raw, motor4_speed_raw;
 uint8_t motor1_speed, motor2_speed, motor3_speed, motor4_speed;
-uint8_t motor1_dir, motor2_dir, motor3_dir, motor4_dir;
+uint8_t pid_p;
+uint8_t motor_id, motor_speed, motor_dir;
+uint8_t dataPck;
+
 long loop_timer = 0;
 
 // seting variables for distancemeter and and motors
@@ -55,86 +55,88 @@ void setup() {
   analogWrite(motor3, 0);
   analogWrite(motor4, 0);
   
-  // Starting port monitor
-  Serial.begin(9600);
-  mySerial.begin(9600);
+  // Starting serial port with bound 115200 bits per second, parity bit set to even, with two stop bits. This ensure us reaible connection
+  Serial.begin(115200, SERIAL_8E2);
 }
 
 void loop() {
-  
-  loop_timer = micros();
-  
-  
-  // defining control bytes
-  uint8_t controlByte1, controlByte2, controlByte3, controlByte4;
-  
-  //to don't couse lag, we clear the buffer when there are more than 6 bytes (2 data packs) available
-  if(mySerial.available()>6){
-    while(mySerial.available()){
-      mySerial.read();
+
+  //simple PID algorithm (only P algorithm in fact)
+  motor1_speed += (motor1_speed_raw - motor1_speed)*pid_p;
+  motor2_speed += (motor2_speed_raw - motor2_speed)*pid_p;
+  motor3_speed += (motor3_speed_raw - motor3_speed)*pid_p;
+  motor4_speed += (motor4_speed_raw - motor4_speed)*pid_p;
+
+  setMotorSpeed(motor1, motor1_speed);
+  setMotorSpeed(motor2, motor2_speed);
+  setMotorSpeed(motor3, motor3_speed);
+  setMotorSpeed(motor4, motor4_speed);
+
+
+}
+
+// Our datapacks look like this:
+
+// 11100111             11101111                                                            11101111
+// pckId + motor id     pckId + motor speed and motor direction (>110, left; <110, right)   pckId + motor speed and motor direction (>110, left; <110, right)
+
+//Thus, we receive three Bytes of data per motor
+
+void serialEvent(){                                                                               //SerialEvent triggers every time we receive UART data
+
+  if(Serial.available()){
+
+    uint8_t read = Serial.read();                                                                 //we read incoming data
+    uint8_t packId = read & 0b00000111;                                                           //we read packId
+    if(dataPck == packId){                                                                        //we validate if we have read correct pack
+      if(dataPck == 0){                                                                           //if it's first pack we get motor id                                                                                                      //we read incoming Byte
+        motor_id = 0b00000111 & read;                                                              
+        dataPck += 1;                                                                             //now we wait for next pack with motor's speed
+      }
+      else if(dataPck == 1){                                                                      //if it's second pack we get first 4 bits of motor speed
+        motor_speed = read;                                                                   
+        dataPck += 1;                                                                             //now we wait for next pack with more motor's speed
+      }
+      else if(dataPck == 2){                                                                      //if it's third pack we get last 4 bits of motor speed
+        motor_speed = motor_speed | (read << 4);                                                  //we combine bits to form 8 bits of motor speed (max value is 255)
+        if(motor_speed<110)motor_dir = 1;                                                         //we obtain motor's direction
+        else if(motor_speed>110){
+          motor_dir = 0;
+          motor_speed -= 110;
+        }
+        else if(motor_speed=110)motor_speed = 0;
+
+        switch(motor_id){                                                                         //we see which motor we should apply those setting to (by knowing motor_id)
+          case 1:
+            PORTD |= motor_dir << 4;
+            motor1_speed_raw = motor_speed;
+            break;
+          case 2:
+            PORTB |= motor_dir << 5;
+            motor2_speed_raw = motor_speed;
+            break;
+          case 3:
+            PORTD |= motor_dir << 2;
+            motor3_speed_raw = motor_speed;
+            break;
+          case 4:
+            PORTB |= motor_dir << 4;
+            motor4_speed_raw = motor_speed;
+            break;
+        }
+        dataPck = 0;
+      }
+      else{
+        dataPck = 0;
+      }
+    }
+    else{
+      dataPck = 0;
     }
   }
-  
-  //if we have more than 3 bytes in serial port read buffer, we start to read control bytes and we can receive message for one motor
-  else if(mySerial.available()>=3){
-    uint8_t dataPck1 = mySerial.read();
-    uint8_t dataPck2 = mySerial.read();
-    uint8_t dataPck3 = mySerial.read();
-    controlByte1 = (0b11100000 & dataPck1)>>5;
-    controlByte2 = (0b11100000 & dataPck2)>>5;
-    controlByte3 = (0b11100000 & dataPck3)>>5;
-    motor_id = (0b00001111 & dataPck1)
-  
-  }
-  
-  
-  
-  //if all data packs are correct we can write new values to the motor
-  if(controlByte1 == 1 && controlByte2 == 2 && controlByte3 == 3){
-    
-    switch(motor_id){
-      case 1: 
-          motor1_speed = (0b00001111 & dataPck2) | (0b00001111 & dataPck3) << 4;
-          if(motor1_speed<110)motor1_dir = 1;
-          else if(motor_speed>110){
-            motor1_dir = 0;
-            motor1_speed -= 110;
-          }
-          else if(motor1_speed == 110) motor1_speed = 0;
-          break;
-      case 2:
-          motor2_speed = (0b00001111 & dataPck2) | (0b00001111 & dataPck3) << 4;
-          if(motor2_speed<110)motor2_dir = 1;
-          else if(motor_speed>110){
-            motor2_dir = 0;
-            motor2_speed -= 110;
-          }
-          else if(motor2_speed == 110) motor2_speed = 0;
-          break;
-       case 3:
-          motor3_speed = (0b00001111 & dataPck2) | (0b00001111 & dataPck3) << 4;
-          if(motor3_speed<110)motor3_dir = 1;
-          else if(motor_speed>110){
-            motor3_dir = 0;
-            motor3_speed -= 110;
-          }
-          else if(motor3_speed == 110) motor3_speed = 0;
-          break;
-       case 4:
-          motor4_speed = (0b00001111 & dataPck2) | (0b00001111 & dataPck3) << 4;
-          if(motor4_speed<110)motor1_dir = 1;
-          else if(motor_speed>110){
-            motor4_dir = 0;
-            motor4_speed -= 110;
-          }
-          else if(motor4_speed == 110) motor4_speed = 0;
-          break;
-          
-      }
-  
-  
-  }
-  
-  while(micros() - loop_timer < 1000);
-  
+
+}
+
+void setMotorSpeed(uint8_t motorID, uint8_t motorSpeed){
+  analogWrite(motorID, map(motorSpeed, 0, 110, 0, 255));
 }
