@@ -8,8 +8,6 @@
   12-2019
 */
 
-// MALISZ POPRAW 'motor_speed', BO NIE JEST ZADEKLAROWANE !!!
-
 
 // defining the RX abd TX port on Arduino Uno board
 #define rx 7
@@ -29,7 +27,7 @@
 // variables containing motor's speed and direction
 uint8_t motor1_speed_raw, motor2_speed_raw, motor3_speed_raw, motor4_speed_raw;
 uint8_t motor1_speed, motor2_speed, motor3_speed, motor4_speed;
-uint8_t pid_p;
+uint8_t pid_p = 0.5;
 uint8_t motor_id, motor_speed, motor_dir;
 uint8_t dataPck;
 
