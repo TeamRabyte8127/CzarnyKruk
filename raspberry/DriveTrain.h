@@ -1,4 +1,5 @@
-#include <cstdint.h>
+#pragma once
+#include <stdint.h>
 #include <math.h>
 #include <algorithm>
 #include "Communication.h"

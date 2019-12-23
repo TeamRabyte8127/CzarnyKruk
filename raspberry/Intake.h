@@ -1,3 +1,4 @@
+#pragma once
 #include <cstdint.h>
 #include "Communication.h"
 

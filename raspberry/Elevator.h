@@ -1,4 +1,5 @@
-#include <cstdint.h>
+#pragma once
+#include <stdint.h>
 #include "Communication.h"
 
 class Elevator  {
