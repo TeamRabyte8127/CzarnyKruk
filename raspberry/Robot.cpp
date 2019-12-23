@@ -28,21 +28,22 @@ void map_values(int values)  {
 
 int main()
 {
-    Communication com();
+    Communication com;
     DriveTrain drive_train(mot1, mot2, mot3, mot4);
     //Elevator elevator(mot5);
     //Intake intake(mot6);
-    UDP_Server udp_server();
+    UDP_Server udp_server;
 
     if(!com.setup()) return 1;
 
     while(!r1 && !l1)  {
-        map_values(UDP_Server.udpServer('1'));
-        drive_train.drive(axis_yl, axis_xl, axis_xr);
+        //map_values(atoi(udp_server.udpServer('1')));
+        std::cout << udp_server.udpServer('1');
+        drive_train.drive(axis_yr, axis_xl, axis_xr);
 
-        com.sendData(setData(drive_train.getMotorValue(mot1),mot1));
-        com.sendData(setData(drive_train.getMotorValue(mot2),mot2));
-        com.sendData(setData(drive_train.getMotorValue(mot3),mot3));
-        com.sendData(setData(drive_train.getMotorValue(mot4),mot4));
+        com.sendData(com.setData(drive_train.getMotorValue(mot1),mot1));
+        com.sendData(com.setData(drive_train.getMotorValue(mot2),mot2));
+        com.sendData(com.setData(drive_train.getMotorValue(mot3),mot3));
+        com.sendData(com.setData(drive_train.getMotorValue(mot4),mot4));
     }
 }

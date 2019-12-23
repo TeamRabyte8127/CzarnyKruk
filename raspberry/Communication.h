@@ -62,7 +62,7 @@ class Communication{
     	return output;
     }	
 
-	bool setup(int serial_port)
+	bool setup()
 	{
 		if (serial_port< 0)			{
 			fprintf (stderr, "Unable to open serial device: %s\n", strerror (errno)) ;

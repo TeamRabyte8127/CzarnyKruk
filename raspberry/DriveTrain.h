@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <math.h>
 #include <algorithm>
-#include "Communication.h"
 
 class DriveTrain  {
 
@@ -15,13 +14,13 @@ class DriveTrain  {
 
         uint8_t getMotorValue(uint8_t motor)  {
             switch (motor){
-                case motor1:
+                case 1:
                     return uint8_t(motor1_value+inputCorretion);
-                case motor2:
+                case 2:
                     return uint8_t(motor2_value+inputCorretion);
-                case motor3:
+                case 3:
                     return uint8_t(motor3_value+inputCorretion);
-                case motor4:
+                case 4:
                     return uint8_t(motor4_value+inputCorretion);
             }
         }
@@ -29,7 +28,7 @@ class DriveTrain  {
         void drive(int8_t foward, int8_t side, int8_t rotate)  {
             const uint8_t max_value = 100;
         
-            int8_t scale = max(max(abs(foward), abs(side)), abs(rotate));
+            int8_t scale = std::max(std::max(std::abs(foward), std::abs(side)), std::abs(rotate));
 
             motor1_value = (foward + side + rotate) * scale;
             motor2_value = (foward - side - rotate) * scale;

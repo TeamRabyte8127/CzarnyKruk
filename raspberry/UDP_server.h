@@ -12,7 +12,7 @@
 class UDP_Server
 {
     public:
-        std::string udpServer(char response [4096])  {
+        std::string udpServer(char response)  {
             struct sockaddr_in serwer =  {
                 .sin_family = AF_INET,
                 .sin_port = htons( SERWER_PORT )
@@ -59,7 +59,7 @@ class UDP_Server
                 char buffer_ip[ 128 ] = { };
                 printf( "|Client ip: %s port: %d|\n", inet_ntop( AF_INET, & client.sin_addr, buffer_ip, sizeof( buffer_ip ) ), ntohs( client.sin_port ) );
                 
-                strncpy( buffer,response, sizeof( buffer ) );
+               
 
                 if( sendto( socket_, buffer, strlen( buffer ), 0,( struct sockaddr * ) & client, len ) < 0 )  {
                     perror( "sendto() ERROR" );
