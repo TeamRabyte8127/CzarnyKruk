@@ -1,10 +1,13 @@
-#pragma once
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <wiringPi.h>
 #include <wiringSerial.h>
 #include <stdlib.h>
+#include <vector>
+#include <stdint.h>
+
+using namespace std;
 
 struct message{
     vector<uint8_t> packets;
@@ -81,7 +84,7 @@ class Communication{
 
 	bool dataAvailable()
 	{
-		return dataAvailable(serial_port);
+		return serialDataAvail(serial_port);
 	}
 
 	uint8_t getData()
