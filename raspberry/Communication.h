@@ -62,14 +62,14 @@ class Communication{
 	{
 		if (serial_port< 0)			{
 			fprintf (stderr, "Unable to open serial device: %s\n", strerror (errno)) ;
-			return 1;
+			return 0;
 		}
 		if (wiringPiSetup () == -1)	
 		{
 			fprintf (stdout, "Unable to start wiringPi: %s\n", strerror (errno)) ;
-			return 1;
+			return 0;
 		}
-		return 0;
+		return 1;
 	}
 
 	void sendData(message data)
