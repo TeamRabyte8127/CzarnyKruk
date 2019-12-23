@@ -9,12 +9,15 @@
 */
 
 
+// defining data pins for distancemter
+#define trigPin 9
+#define echoPin 10
+
 // defining motors and motors direction pins
 #define motor1 3
 #define motor1dir 4
 #define motor1_enca PINB7
 #define motor1_encb PINB8
-
 
 #define motor2 5
 #define motor2dir 13
@@ -31,6 +34,9 @@
 #define motor4_enca 
 #define motor4_encb
 
+// defines variables for distancemeter
+long duration;
+int distance;
 
 // variables containing motor's speed and direction
 uint8_t motor1_speed_raw, motor2_speed_raw, motor3_speed_raw, motor4_speed_raw;
@@ -53,7 +59,9 @@ PCMSK2 |= 0b00000000;
 PCMSK1 |= 0b00000000;
 PCMSK0 |= 0b00000000;
 
-
+// Sets the trigPin as an Output and echoPin as an Input using registers
+DDRB = B00000010;
+PORTB = B00000000;
 
 // Setting motors pins I/O (registers)
   PORTD = B00001000;
@@ -75,6 +83,24 @@ PCMSK0 |= 0b00000000;
 }
 
 void loop() {
+  
+  // Clears the trigPin
+  PORTD = B00000000;
+  delayMicroseconds(2);
+  
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  PORTB = (1 << 1) | PORTD;
+  delayMicroseconds(10);
+  PORTB = ~(1 << 1) & PORTD;
+  
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echoPin, HIGH);
+  
+  // Calculating the distance
+  distance = duration*0.034/2;
+  
+  // Prints the distance on the Serial Monitor
+  Serial.println(distance);
 
   //simple PID algorithm (only P algorithm in fact)
   motor1_speed += (motor1_speed_raw - motor1_speed)*pid_p;
