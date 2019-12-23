@@ -1,4 +1,4 @@
-#include <cstdint>
+#include <cstdint.h>
 #include <math.h>
 #include <algorithm>
 #include "Communication.h"
