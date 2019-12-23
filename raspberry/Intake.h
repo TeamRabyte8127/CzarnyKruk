@@ -1,6 +1,4 @@
-#pragma once
-#include <cstdint.h>
-#include "Communication.h"
+#include <stdint.h>
 
 class Intake  {
 
@@ -10,8 +8,8 @@ class Intake  {
         const int inputCorretion = 110;
 
     public:
-        void set_motors(int16_t motor_value)  {
-                com.sendData(com.setData(motor_value + inputCorretion, motor));
+        void set_motors(int8_t motor_value)  {
+                com.sendData(com.setData(abs(uint8_t(motor_value + inputCorretion)), motor));
         }
 
         void rotate(int8_t direction)  {

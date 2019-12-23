@@ -27,6 +27,12 @@ class Communication{
 	int readPin;
 	int recieve;
 
+	Communication(int s = serialOpen ("/dev/ttyS0", 9600),int n=16)
+	{
+		serial_port=s;
+		readPin=n;
+	}
+
 	uint8_t setBits(uint8_t var, uint8_t value, int second)
 	{
     	var = var|(value<<(8-second));
@@ -56,23 +62,18 @@ class Communication{
     	return output;
     }	
 
-	Communication(int s= serialOpen ("/dev/ttyS0", 9600),int n=16)
-	{
-		serial_port=s;
-		readPin=n;
-	}
 	bool setup(int serial_port)
 	{
 		if (serial_port< 0)			{
 			fprintf (stderr, "Unable to open serial device: %s\n", strerror (errno)) ;
-			return 1;
+			return 0;
 		}
 		if (wiringPiSetup () == -1)	
 		{
 			fprintf (stdout, "Unable to start wiringPi: %s\n", strerror (errno)) ;
-			return 1;
+			return 0;
 		}
-		return 0;
+		return 1;
 	}
 
 	void sendData(message data)

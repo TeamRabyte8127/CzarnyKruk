@@ -1,17 +1,18 @@
-#pragma once
 #include <stdint.h>
-#include "Communication.h"
+
 
 class Elevator  {
 
     private:
-        uint8_t motor;
-        Communication com;
+        uint8_t motor1;
         const int inputCorretion = 110;
 
     public:
-        void set_motors(int16_t motor_value)  {
-                com.sendData(com.setData(motor_value + inputCorretion, motor));
+        uint8_t getMotorValue(uint8_t motor)  {
+                switch(motor){
+                    case motor1:
+                        return 
+                }
         }
 
         void move(int8_t direction)  {
@@ -27,8 +28,7 @@ class Elevator  {
             change_pos(0);
         }
 
-    Elevator(uint8_t mot, Communication comunication;)  {
-        motor = mot;
-        com = communication;
+    Elevator(uint8_t mot)  {
+        motor1 = mot;
     }
 };

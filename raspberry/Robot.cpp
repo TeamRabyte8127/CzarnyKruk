@@ -1,10 +1,10 @@
 #pragma once
+#include <iostream>
 #include "DriveTrain.h"
-#include "Elevator.h"
-#include "Intake.h"
+//#include "Elevator.h"
+//#include "Intake.h"
 #include "Communication.h"
 #include "UDP_server.h"
-#include <iostream>
 
 int mot1 = 1, mot2 = 2, mot3 = 3, mot4 = 4, mot5 = 5, mot6 = 6;
 int axis_xr = 0, axis_yr = 0, axis_xl = 0, l2 = 0, r2 = 0;
@@ -29,9 +29,9 @@ void map_values(int values)  {
 int main()
 {
     Communication com();
-    DriveTrain drive_train(mot1, mot2, mot3, mot4, com);
-    Elevator elevator(mot5, com);
-    Intake intake(mot6, com);
+    DriveTrain drive_train(mot1, mot2, mot3, mot4);
+    //Elevator elevator(mot5);
+    //Intake intake(mot6);
     UDP_Server udp_server();
 
     if(!com.setup()) return 1;
@@ -39,5 +39,10 @@ int main()
     while(!r1 && !l1)  {
         map_values(UDP_Server.udpServer('1'));
         drive_train.drive(axis_yl, axis_xl, axis_xr);
+
+        com.sendData(setData(drive_train.getMotorValue(mot1),mot1));
+        com.sendData(setData(drive_train.getMotorValue(mot2),mot2));
+        com.sendData(setData(drive_train.getMotorValue(mot3),mot3));
+        com.sendData(setData(drive_train.getMotorValue(mot4),mot4));
     }
 }
