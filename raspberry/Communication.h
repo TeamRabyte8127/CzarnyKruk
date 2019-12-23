@@ -1,10 +1,13 @@
-#pragma once
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <wiringPi.h>
 #include <wiringSerial.h>
 #include <stdlib.h>
+#include <vector>
+#include <stdint.h>
+
+using namespace std;
 
 struct message{
     vector<uint8_t> packets;
@@ -62,14 +65,14 @@ class Communication{
 	{
 		if (serial_port< 0)			{
 			fprintf (stderr, "Unable to open serial device: %s\n", strerror (errno)) ;
-			return 0;
+			return 1;
 		}
 		if (wiringPiSetup () == -1)	
 		{
 			fprintf (stdout, "Unable to start wiringPi: %s\n", strerror (errno)) ;
-			return 0;
+			return 1;
 		}
-		return 1;
+		return 0;
 	}
 
 	void sendData(message data)
@@ -81,7 +84,7 @@ class Communication{
 
 	bool dataAvailable()
 	{
-		return dataAvailable(serial_port);
+		return serialDataAvail(serial_port);
 	}
 
 	uint8_t getData()
