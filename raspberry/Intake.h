@@ -1,4 +1,4 @@
-#include <cstdint>
+#include <cstdint.h>
 #include "Communication.h"
 
 class Intake  {
