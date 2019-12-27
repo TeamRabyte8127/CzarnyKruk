@@ -33,6 +33,14 @@ class Communication{
 		readPin=n;
 	}
 
+	template <typename T> uint8_t countBits(T a, int n){
+	    uint8_t number = 0;
+	    for (int i = n-1; i>=0; i--){
+	        number += (1&(a>>i));
+    	}
+    return number;
+	}
+
 	uint8_t setBits(uint8_t var, uint8_t value, int second)
 	{
     	var = var|(value<<(8-second));
@@ -42,23 +50,19 @@ class Communication{
 	message setData(uint8_t value, uint8_t motor)
 	{
 	    message output;
-	    output.numberOfPackets=3;
+	    output.numberOfPackets=2;
 	    output.setPackets();
 	    
-	    uint8_t transformedValue[2];
+	    uint8_t direction=0b00000001&(value>>7);
+	    value = value&0b01111111;
 	    
-	    transformedValue[1]=(uint8_t)(0x0F & value);
-	    transformedValue[0]=value>>4;
+	    output.packets[0]=setBits(output.packets[0], countBits(value, 8), 4);
+	    output.packets[0]=setBits(output.packets[0], motor, 7);
+	    output.packets[0]=setBits(output.packets[0], direction, 8);
 	    
-	    output.packets[0]=setBits(output.packets[0], 7, 3);
-	    output.packets[0]=setBits(output.packets[0], motor, 8);
-	    
-	    output.packets[1]=setBits(output.packets[1], 5, 3);
-	    output.packets[1]=setBits(output.packets[1], transformedValue[0], 8);
-	    
-	    output.packets[2]=setBits(output.packets[2], 3, 3);
-	    output.packets[2]=setBits(output.packets[2], transformedValue[1], 8);
-    
+	    output.packets[1]=setBits(output.packets[1], 1, 1);
+	    output.packets[1]=setBits(output.packets[1], value, 8);
+
     	return output;
     }	
 
@@ -78,7 +82,7 @@ class Communication{
 
 	void sendData(message data)
 	{
-		for(int i = 0; i<3; i++){
+		for(int i = 0; i<2; i++){
 			serialPutchar(serial_port, data.packets[i]);
 		}
 	}
