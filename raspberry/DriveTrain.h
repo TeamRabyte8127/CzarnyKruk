@@ -2,15 +2,30 @@
 #include <math.h>
 #include <algorithm>
 
+/*
+motor3    motor2
+
+
+motor4    motor1
+*/
+
+
 class DriveTrain  {
 
     private:
-        const int inputCorretion = 110;
+        const int inputCorretion = 127;
         uint8_t motor1, motor2, motor3, motor4;
         
         int8_t motor1_value, motor2_value, motor3_value, motor4_value;
     
     public:
+
+        DriveTrain(uint8_t mot1, uint8_t mot2, uint8_t mot3, uint8_t mot4)  {
+            motor1 = mot1;
+            motor2 = mot2;
+            motor3 = mot3;
+            motor4 = mot4;
+        }
 
         uint8_t getMotorValue(uint8_t motor)  {
             switch (motor){
@@ -26,14 +41,14 @@ class DriveTrain  {
         }
 
         void drive(int8_t foward, int8_t side, int8_t rotate)  {
-            const uint8_t max_value = 100;
+            const uint8_t max_value = 127;
         
             int8_t scale = std::max(std::max(std::abs(foward), std::abs(side)), std::abs(rotate));
 
-            motor1_value = (foward + side + rotate) * scale;
-            motor2_value = (foward - side - rotate) * scale;
-            motor3_value = (foward - side + rotate) * scale;
-            motor4_value = (foward + side - rotate) * scale;
+            motor1_value = -(foward + side - rotate) * scale;
+            motor2_value = -(foward - side - rotate) * scale;
+            motor3_value = (foward + side + rotate) * scale;
+            motor4_value = (foward - side + rotate) * scale;
 
             if (motor1_value < -max_value) motor1_value = -max_value;
             if (motor1_value > max_value) motor1_value = max_value;
@@ -48,11 +63,4 @@ class DriveTrain  {
             if (motor4_value > max_value) motor4_value = max_value;
 
         }
-
-    DriveTrain(uint8_t mot1, uint8_t mot2, uint8_t mot3, uint8_t mot4)  {
-        motor1 = mot1;
-        motor2 = mot2;
-        motor3 = mot3;
-        motor4 = mot4;
-    }
 };
