@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include "DriveTrain.h"
-//#include "Elevator.h"
+#include "Elevator.h"
 //#include "Intake.h"
 #include "Communication.h"
 #include "UDP_server.h"
@@ -56,7 +56,7 @@ int main()
 {
     Communication com;
     DriveTrain drive_train(mot1, mot2, mot3, mot4);
-    //Elevator elevator(mot5);
+    Elevator elevator(mot5);
     //Intake intake(mot6);
     UDP_Server udp_server;
 
@@ -67,6 +67,10 @@ int main()
         std::cout << udp_server.udpServer('1');
         cout<<xl<<yl<<xr<<yr;
         drive_train.drive(xr, yr, xl);
+      //  elevator.setPosition(lt);
+        //w tym komentarzu chodzi o to zebyście mi dali dalmierz = com.getData();
+      //  elevator.changePosition(dalmierz);
+      //  com.sendData(com.setData(elevator.getMotorValue(mot5),mot5));
 /*
         com.sendData(com.setData(drive_train.getMotorValue(mot1),mot1));
         com.sendData(com.setData(drive_train.getMotorValue(mot2),mot2));
