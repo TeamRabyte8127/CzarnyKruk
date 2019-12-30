@@ -1,34 +1,53 @@
 #include <stdint.h>
-
+#include <math.h>
+#define low 10;
+#define medium 20;
+#define high 30
+#define speedControl 20;
+#define marginError 3
 
 class Elevator  {
 
     private:
-        uint8_t motor1;
-        const int inputCorretion = 110;
+        uint8_t motor;
+        int8_t motor_value;
+        uint8_t target_position.; 
+        int8_t speed;
 
     public:
-        uint8_t getMotorValue(uint8_t motor)  {
-                switch(motor){
-                    case motor1:
-                        return 
-                }
+
+        Elevator(uint8_t mot)  {
+            motor = mot;
         }
 
-        void move(int8_t direction)  {
-            set_motors(50 * direction);
+        uint8_t getMotorValue()  {
+            return motor_value;
         }
 
-        void change_pos(int8_t position)  {
-            
+        void setPosition(int8_t trigger_state)
+        {
+            switch(trigger_state)
+            {
+                case -1:
+                target_position=low;
+                break;
+                case 0:
+                target_position = medium;
+                break;
+                case 1:
+                target_position = high;
+                break;
+            }
         }
-
-        void set_base()  {
-            change_pos(1);
-            change_pos(0);
+        int8_t changePosition(uint8_t distance)  {
+            if (std::abs(distance-target_position>speedControl)
+            {
+                motor_value = 50*(distance-target_position/(std::abs(distance-target_position)*(-1);
+            }
+            else if (std::abs(distance-target_position<speedControl && std::abs(distance-target_position>marginError) 
+            {
+                motor_value = 2,5*(std::abs(distance-target_position))*(distance-target_position/(std::abs(distance-target_position)*(-1);
+            }
         }
-
-    Elevator(uint8_t mot)  {
-        motor1 = mot;
     }
 };
